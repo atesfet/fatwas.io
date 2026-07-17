@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="description" content="Interactive results for the FatWAS study.">
+  <meta name="keywords" content="FatWAS, PheWAS, CT, adipose tissue, SFI, VFI, SFD, VFD">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Phenome-wide Associations of CT-derived Adipose Area and Radiodensity in 22,779 Patients</title>
+
+  <link href="https://fonts.googleapis.com/css?family=Google+Sans|Noto+Sans|Castoro" rel="stylesheet">
+  <link rel="stylesheet" href="./static/css/bulma.min.css">
+  <link rel="stylesheet" href="./static/css/bulma-carousel.min.css">
+  <link rel="stylesheet" href="./static/css/bulma-slider.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jpswalsh/academicons@1/css/academicons.min.css">
+  <link rel="stylesheet" href="./static/css/index.css?v=20260302a">
+  <link rel="stylesheet" href="./static/css/tablesorter.css">
+  <link rel="icon" href="./static/images/favicon.svg">
+
+  <script src="./static/js/jquery-3.6.0.min.js"></script>
+  <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.22/css/jquery.dataTables.css">
+  <script type="text/javascript" src="https://cdn.datatables.net/1.10.22/js/jquery.dataTables.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jspdf-autotable@3.8.2/dist/jspdf.plugin.autotable.min.js"></script>
+
+  <link rel="stylesheet" href="./static/css/fontawesome.all.min.css">
+  <script src="./static/js/bulma-carousel.min.js"></script>
+  <script src="./static/js/bulma-slider.min.js"></script>
+  <script src="./static/js/fontawesome.all.min.js"></script>
+  <script src="./static/js/fatwas.js?v=20260302e" defer></script>
+</head>
+<body>
+
+<nav class="navbar" role="navigation" aria-label="main navigation">
+  <div class="navbar-brand">
+    <a role="button" class="navbar-burger" aria-label="menu" aria-expanded="false">
+      <span aria-hidden="true"></span>
+      <span aria-hidden="true"></span>
+      <span aria-hidden="true"></span>
+    </a>
+  </div>
+  <div class="navbar-menu">
+    <div class="navbar-start" style="flex-grow: 1; justify-content: center;">
+      <a class="navbar-item" href="#">
+        <span class="icon"><i class="fas fa-home"></i></span>
+      </a>
+      <div class="navbar-item has-dropdown is-hoverable">
+        <a class="navbar-link">Visualize Results</a>
+        <div class="navbar-dropdown">
+          <a class="navbar-item" href="#SFI_results">SFI</a>
+          <a class="navbar-item" href="#VFI_results">VFI</a>
+          <a class="navbar-item" href="#SFD_results">SFD</a>
+          <a class="navbar-item" href="#VFD_results">VFD</a>
+          <a class="navbar-item" href="#overall_results">Overall</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<section class="hero">
+  <div class="hero-body">
+    <div class="container is-max-desktop">
+      <div class="columns is-centered">
+        <div class="column has-text-centered">
+          <h1 class="title is-2 publication-title">Phenome-wide Associations of CT-derived Adipose Area and Radiodensity in 22,779 Patients: Uncovering Unexpected Disease Connections</h1>
+          <div class="is-size-5 publication-authors">
+            <span class="author-block">FatWAS Study Team</span>
+          </div>
+          <div class="column has-text-centered">
+            <div class="publication-links">
+              <span class="link-block">
+                <a href="https://github.com" class="external-link button is-normal is-rounded is-dark">
+                  <span class="icon"><i class="fab fa-github"></i></span>
+                  <span>Code</span>
+                </a>
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container is-max-desktop">
+    <div class="columns is-centered has-text-centered">
+      <div class="column is-four-fifths">
+        <h2 class="title is-3">Abstract</h2>
+        <div class="content has-text-justified">
+          <p>Large-scale, quantitative phenotyping from already-acquired clinical imaging offers a new opportunistic avenue to characterize adipose tissue. Here, we perform a phenome-wide association study (PheWAS) of adipose composition derived automatically from abdominal CT scans.</p>
+          <p>We linked subcutaneous and visceral fat area (SFI and VFI) and radiodensity (SFD and VFD) from 22,779 patients to 1,447 EHR-derived phenotypes. We identified 1,563 significant associations across 522 diseases, recapitulating known links and identifying novel associations between adipose radiodensity and systemic disease.</p>
+          <p>This interactive website provides Manhattan and volcano plots for each marker and a searchable table of all significant associations.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="tips">
+  <div class="container is-max-desktop">
+    <div class="columns is-centered has-text-centered">
+      <h2 class="title is-3">Website Usage Tips</h2>
+    </div>
+    <div class="content has-text-justified">
+      <p>Hover over points for phenotype details and confidence intervals.</p>
+      <p>Use drag/zoom tools in the top-right of each plot to inspect dense regions.</p>
+      <p>Use the <b>Focus</b> button in the table to activate phenotype focus view across all plots.</p>
+      <p>In focus view, all associated markers are highlighted; non-associated marker plots show a centered \"not significant\" message.</p>
+      <p>Use <b>Download Focus PDF</b> to export a report with focused plots and the phenotype's associated rows.</p>
+      <p>Use <b>Open Discussion (GitHub)</b> to open the phenotype discussion thread/search in this repository (GitHub account required to comment). This is not an "Issue" but a "Feature"!</p>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="SFI_results">
+  <div class="container is-max-desktop">
+    <div class="columns is-centered has-text-centered"><h2 class="title is-3">SFI Results</h2></div>
+    <div class="iframe-container"><iframe id="plot-sfi-manhattan" src="plot.html?metric=SFI&type=manhattan&v=20260302h" class="responsive-iframe"></iframe></div>
+    <div class="iframe-container"><iframe id="plot-sfi-volcano" src="plot.html?metric=SFI&type=volcano&v=20260302h" class="responsive-iframe"></iframe></div>
+  </div>
+</section>
+
+<section class="section" id="VFI_results">
+  <div class="container is-max-desktop">
+    <div class="columns is-centered has-text-centered"><h2 class="title is-3">VFI Results</h2></div>
+    <div class="iframe-container"><iframe id="plot-vfi-manhattan" src="plot.html?metric=VFI&type=manhattan&v=20260302h" class="responsive-iframe"></iframe></div>
+    <div class="iframe-container"><iframe id="plot-vfi-volcano" src="plot.html?metric=VFI&type=volcano&v=20260302h" class="responsive-iframe"></iframe></div>
+  </div>
+</section>
+
+<section class="section" id="SFD_results">
+  <div class="container is-max-desktop">
+    <div class="columns is-centered has-text-centered"><h2 class="title is-3">SFD Results</h2></div>
+    <div class="iframe-container"><iframe id="plot-sfd-manhattan" src="plot.html?metric=SFD&type=manhattan&v=20260302h" class="responsive-iframe"></iframe></div>
+    <div class="iframe-container"><iframe id="plot-sfd-volcano" src="plot.html?metric=SFD&type=volcano&v=20260302h" class="responsive-iframe"></iframe></div>
+  </div>
+</section>
+
+<section class="section" id="VFD_results">
+  <div class="container is-max-desktop">
+    <div class="columns is-centered has-text-centered"><h2 class="title is-3">VFD Results</h2></div>
+    <div class="iframe-container"><iframe id="plot-vfd-manhattan" src="plot.html?metric=VFD&type=manhattan&v=20260302h" class="responsive-iframe"></iframe></div>
+    <div class="iframe-container"><iframe id="plot-vfd-volcano" src="plot.html?metric=VFD&type=volcano&v=20260302h" class="responsive-iframe"></iframe></div>
+  </div>
+</section>
+
+<section class="section" id="overall_results">
+  <div class="container is-max-desktop">
+    <div class="columns is-centered has-text-centered"><h2 class="title is-3">Overall Results</h2></div>
+    <div class="iframe-container"><iframe id="plot-overall" src="overall.html?v=20260302h" class="responsive-iframe"></iframe></div>
+    <div class="table-caption">Top associations across all four markers ranked by statistical significance.</div>
+
+    <br>
+    <div class="focus-panel">
+      <div><strong>Focus phenotype:</strong> <span id="focusPhenotypeLabel">None selected</span></div>
+      <div id="focusPhenotypeDetails"></div>
+      <div class="focus-panel-actions">
+        <button id="clearFocusButton" class="button is-light is-small" type="button">Clear Focus</button>
+        <button id="downloadFocusPdfButton" class="button is-dark is-small" type="button" disabled>Download Focus PDF</button>
+        <button id="openFocusDiscussionButton" class="button is-link is-small" type="button" disabled>Open Discussion (GitHub)</button>
+      </div>
+    </div>
+
+    <br>
+    <div class="table-caption">Significant FatWAS associations (Bonferroni-adjusted p-values).</div>
+    <div class="table-container">
+      <table id="mainTable" class="display" style="width:100%">
+        <thead>
+          <tr>
+            <th>Focus</th>
+            <th>Phenotype</th>
+            <th>Description</th>
+            <th>Phenotype Group</th>
+            <th>Metric</th>
+            <th>P Value</th>
+            <th>OR (95% CI)</th>
+            <th>Total (n)</th>
+            <th>Cases (n)</th>
+            <th>Controls (n)</th>
+          </tr>
+          <tr>
+            <th></th>
+            <th><input type="text" placeholder="Search Phenotype"></th>
+            <th><input type="text" placeholder="Search Description"></th>
+            <th><input type="text" placeholder="Search Group"></th>
+            <th><input type="text" placeholder="Search Metric"></th>
+            <th></th>
+            <th></th>
+            <th></th>
+            <th></th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="associationTableBody"></tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+</body>
+</html>

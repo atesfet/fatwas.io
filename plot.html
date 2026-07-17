@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>FatWAS Plot</title>
+  <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+  <style>
+    html, body { margin: 0; height: 100%; font-family: Arial, sans-serif; }
+    #plot { width: 100%; height: 100%; }
+  </style>
+</head>
+<body>
+  <div id="plot"></div>
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const metric = (params.get('metric') || 'SFI').toUpperCase();
+    const type = (params.get('type') || 'manhattan').toLowerCase();
+
+    let allData = [];
+    let focusedPhenotype = '';
+
+    function toNum(v) {
+      const n = Number(v);
+      return Number.isFinite(n) ? n : null;
+    }
+
+    function parsePValue(raw) {
+      const s = String(raw || '').trim();
+      if (!s) {
+        return null;
+      }
+
+      if (s[0] === '<') {
+        const n = Number(s.slice(1).trim());
+        if (Number.isFinite(n) && n > 0) {
+          return n / 2;
+        }
+      }
+
+      const n = Number(s);
+      if (!Number.isFinite(n)) {
+        return null;
+      }
+      if (n <= 0) {
+        return 1e-300;
+      }
+      return n;
+    }
+
+    function toPValueFromRow(row) {
+      return parsePValue(row.p) || parsePValue(row.bonf_pval) || 1e-300;
+    }
+
+    function normalizePhenotype(value) {
+      const s = String(value || '').trim();
+      if (/^\d+(?:\.\d+)?$/.test(s)) {
+        const parts = s.split('.');
+        let intPart = parts[0].replace(/^0+(?=\d)/, '');
+        if (!intPart) {
+          intPart = '0';
+        }
+        if (parts.length === 1) {
+          return intPart;
+        }
+        const fracPart = parts[1].replace(/0+$/, '');
+        return fracPart ? (intPart + '.' + fracPart) : intPart;
+      }
+      return s;
+    }
+
+    function plotTitle() {
+      return metric + ' ' + (type === 'volcano' ? 'Volcano Plot' : 'Manhattan Plot');
+    }
+
+    function focusLabel() {
+      if (!focusedPhenotype) {
+        return '';
+      }
+      const hit = allData.find(function(r) {
+        return normalizePhenotype(r.phenotype) === focusedPhenotype;
+      });
+      const desc = hit && hit.description ? String(hit.description).trim() : '';
+      return focusedPhenotype + (desc ? (' - ' + desc) : '');
+    }
+
+    function render() {
+      const filtered = allData
+        .filter(r => (r.metric || '').toUpperCase() === metric)
+        .map(r => ({
+          phenotype: normalizePhenotype(r.phenotype),
+          description: r.description || '',
+          group: r.group || '',
+          color: r.color || 'gray',
+          p: toPValueFromRow(r),
+          or: toNum(r.OR),
+          or_ci: r.OR_CI || '',
+          groupnum: toNum(r.groupnum)
+        }))
+        .filter(r => r.p && r.or);
+
+      filtered.sort((a, b) => (a.groupnum || 999) - (b.groupnum || 999) || a.p - b.p);
+
+      const mapped = filtered.map((r, idx) => {
+        const y = -Math.log10(r.p);
+        const x = type === 'volcano' ? Math.log2(r.or) : (idx + 1);
+        return {
+          x: x,
+          y: y,
+          text: r.description + '<br>Phenotype: ' + r.phenotype + '<br>Group: ' + r.group + '<br>OR (95% CI): ' + r.or_ci + '<br>p: ' + r.p.toExponential(2),
+          color: r.color,
+          phenotype: r.phenotype
+        };
+      });
+
+      const base = mapped.filter(r => !focusedPhenotype || r.phenotype !== focusedPhenotype);
+      const focus = mapped.filter(r => focusedPhenotype && r.phenotype === focusedPhenotype);
+
+      const traces = [
+        {
+          x: base.map(r => r.x),
+          y: base.map(r => r.y),
+          mode: 'markers',
+          type: 'scatter',
+          marker: { size: 7, color: base.map(r => r.color), opacity: focusedPhenotype ? 0.38 : 0.8 },
+          text: base.map(r => r.text),
+          hovertemplate: '%{text}<extra></extra>',
+          showlegend: false
+        }
+      ];
+
+      if (focus.length) {
+        traces.push({
+          x: focus.map(r => r.x),
+          y: focus.map(r => r.y),
+          mode: 'markers',
+          type: 'scatter',
+          marker: {
+            size: 12,
+            color: '#111',
+            symbol: 'diamond',
+            line: { color: '#ffcc00', width: 2 },
+            opacity: 1
+          },
+          text: focus.map(r => r.text),
+          hovertemplate: '%{text}<extra>Focused phenotype</extra>',
+          name: 'Focused phenotype'
+        });
+      }
+
+      const bonf = 0.05 / 1447;
+      const xaxis = { title: type === 'volcano' ? 'log2(Odds Ratio)' : 'Phenotype Rank' };
+      const yaxis = { title: '-log10(p)' };
+
+      const layout = {
+        title: plotTitle() + (focusedPhenotype ? ' (Focus: ' + focusLabel() + ')' : ''),
+        xaxis: xaxis,
+        yaxis: yaxis,
+        annotations: (focusedPhenotype && !focus.length) ? [{
+          xref: 'paper',
+          yref: 'paper',
+          x: 0.5,
+          y: 0.5,
+          xanchor: 'center',
+          yanchor: 'middle',
+          text: 'Focused phenotype not significant for ' + metric,
+          showarrow: false,
+          font: { size: 14, color: '#8b0000' },
+          bgcolor: 'rgba(255,245,245,0.96)',
+          bordercolor: '#a40000',
+          borderwidth: 2,
+          borderpad: 10
+        }] : [],
+        shapes: [{
+          type: 'line',
+          xref: 'paper', yref: 'y',
+          x0: 0, x1: 1,
+          y0: -Math.log10(bonf), y1: -Math.log10(bonf),
+          line: { color: 'red', width: 1.5, dash: 'dash' }
+        }],
+        margin: { l: 60, r: 20, t: 60, b: 60 }
+      };
+
+      Plotly.newPlot('plot', traces, layout, { responsive: true, displaylogo: false });
+    }
+
+    function exportImage(requestId) {
+      const exportWidth = 2200;
+      const exportHeight = 1300;
+      Plotly.toImage('plot', {
+        format: 'png',
+        width: exportWidth,
+        height: exportHeight,
+        scale: 2
+      }).then(function(dataUrl) {
+        window.parent.postMessage({
+          type: 'exportImageResult',
+          requestId: requestId,
+          plotId: metric + '_' + type,
+          title: plotTitle() + (focusedPhenotype ? ' (Focus: ' + focusLabel() + ')' : ''),
+          dataUrl: dataUrl,
+          width: exportWidth,
+          height: exportHeight
+        }, '*');
+      }).catch(function(err) {
+        window.parent.postMessage({
+          type: 'exportImageResult',
+          requestId: requestId,
+          plotId: metric + '_' + type,
+          error: String(err)
+        }, '*');
+      });
+    }
+
+    window.addEventListener('message', function(event) {
+      const msg = event.data || {};
+      if (msg.type === 'focusPhenotype') {
+        focusedPhenotype = normalizePhenotype(msg.phenotype);
+        render();
+      }
+      if (msg.type === 'exportImage') {
+        focusedPhenotype = normalizePhenotype(msg.phenotype);
+        render();
+        setTimeout(function() { exportImage(msg.requestId); }, 100);
+      }
+    });
+
+    Papa.parse('significant_associations.csv', {
+      download: true,
+      header: true,
+      skipEmptyLines: true,
+      complete: function(results) {
+        allData = results.data;
+        render();
+      }
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>FatWAS Overall</title>
+  <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+  <style>
+    html, body { margin: 0; height: 100%; font-family: Arial, sans-serif; }
+    #plot { width: 100%; height: 100%; }
+  </style>
+</head>
+<body>
+  <div id="plot"></div>
+  <script>
+    let allData = [];
+    let focusedPhenotype = '';
+
+    function toNum(v) {
+      const n = Number(v);
+      return Number.isFinite(n) ? n : null;
+    }
+
+    function parsePValue(raw) {
+      const s = String(raw || '').trim();
+      if (!s) {
+        return null;
+      }
+
+      if (s[0] === '<') {
+        const n = Number(s.slice(1).trim());
+        if (Number.isFinite(n) && n > 0) {
+          return n / 2;
+        }
+      }
+
+      const n = Number(s);
+      if (!Number.isFinite(n)) {
+        return null;
+      }
+      if (n <= 0) {
+        return 1e-300;
+      }
+      return n;
+    }
+
+    function toPValueFromRow(row) {
+      return parsePValue(row.p) || parsePValue(row.bonf_pval) || 1e-300;
+    }
+
+    function normalizePhenotype(value) {
+      const s = String(value || '').trim();
+      if (/^\d+(?:\.\d+)?$/.test(s)) {
+        const parts = s.split('.');
+        let intPart = parts[0].replace(/^0+(?=\d)/, '');
+        if (!intPart) {
+          intPart = '0';
+        }
+        if (parts.length === 1) {
+          return intPart;
+        }
+        const fracPart = parts[1].replace(/0+$/, '');
+        return fracPart ? (intPart + '.' + fracPart) : intPart;
+      }
+      return s;
+    }
+
+    function focusLabel() {
+      if (!focusedPhenotype) {
+        return '';
+      }
+      const hit = allData.find(function(r) {
+        return normalizePhenotype(r.phenotype) === focusedPhenotype;
+      });
+      const desc = hit && hit.description ? String(hit.description).trim() : '';
+      return focusedPhenotype + (desc ? (' - ' + desc) : '');
+    }
+
+    function render() {
+      const data = allData.map(r => ({
+        phenotype: normalizePhenotype(r.phenotype),
+        description: r.description || '',
+        metric: r.metric || '',
+        p: toPValueFromRow(r),
+        or: toNum(r.OR),
+        lower: toNum(r.lower),
+        upper: toNum(r.upper),
+        group: r.group || ''
+      })).filter(r => r.p && r.or && r.lower && r.upper);
+
+      data.sort((a, b) => a.p - b.p);
+      const top = data.slice(0, 120).reverse();
+
+      const metricColors = { SFI: '#1f77b4', VFI: '#ff7f0e', SFD: '#2ca02c', VFD: '#d62728' };
+
+      const mapped = top.map(r => ({
+        x: r.or,
+        y: r.metric + ' | ' + r.phenotype + ': ' + r.description,
+        errPlus: r.upper - r.or,
+        errMinus: r.or - r.lower,
+        color: metricColors[r.metric] || '#666',
+        text: r.metric + '<br>' + r.description + '<br>Phenotype: ' + r.phenotype + '<br>Group: ' + r.group + '<br>OR: ' + r.or.toFixed(2) + ' [' + r.lower.toFixed(2) + '-' + r.upper.toFixed(2) + ']<br>p: ' + r.p.toExponential(2),
+        phenotype: r.phenotype
+      }));
+
+      const base = mapped.filter(r => !focusedPhenotype || r.phenotype !== focusedPhenotype);
+      const focus = mapped.filter(r => focusedPhenotype && r.phenotype === focusedPhenotype);
+
+      const traces = [
+        {
+          x: base.map(r => r.x),
+          y: base.map(r => r.y),
+          mode: 'markers',
+          type: 'scatter',
+          marker: {
+            size: 8,
+            color: base.map(r => r.color),
+            opacity: focusedPhenotype ? 0.2 : 0.9
+          },
+          error_x: {
+            type: 'data',
+            symmetric: false,
+            array: base.map(r => r.errPlus),
+            arrayminus: base.map(r => r.errMinus),
+            thickness: 1,
+            width: 0
+          },
+          text: base.map(r => r.text),
+          hovertemplate: '%{text}<extra></extra>',
+          showlegend: false
+        }
+      ];
+
+      if (focus.length) {
+        traces.push({
+          x: focus.map(r => r.x),
+          y: focus.map(r => r.y),
+          mode: 'markers',
+          type: 'scatter',
+          marker: {
+            size: 12,
+            color: '#111',
+            symbol: 'diamond',
+            line: { color: '#ffcc00', width: 2 },
+            opacity: 1
+          },
+          error_x: {
+            type: 'data',
+            symmetric: false,
+            array: focus.map(r => r.errPlus),
+            arrayminus: focus.map(r => r.errMinus),
+            thickness: 1,
+            width: 0
+          },
+          text: focus.map(r => r.text),
+          hovertemplate: '%{text}<extra>Focused phenotype</extra>',
+          name: 'Focused phenotype'
+        });
+      }
+
+      const layout = {
+        title: 'Top 120 Significant Associations Across All Fat Markers' + (focusedPhenotype ? ' (Focus: ' + focusLabel() + ')' : ''),
+        xaxis: { title: 'Odds Ratio (95% CI)' },
+        yaxis: { automargin: true },
+        margin: { l: 380, r: 30, t: 60, b: 50 },
+        shapes: [{
+          type: 'line',
+          x0: 1, x1: 1, y0: 0, y1: 1,
+          xref: 'x', yref: 'paper',
+          line: { color: '#888', width: 1, dash: 'dot' }
+        }]
+      };
+
+      Plotly.newPlot('plot', traces, layout, { responsive: true, displaylogo: false });
+    }
+
+    function exportImage(requestId) {
+      const exportWidth = 2200;
+      const exportHeight = 1300;
+      Plotly.toImage('plot', {
+        format: 'png',
+        width: exportWidth,
+        height: exportHeight,
+        scale: 2
+      }).then(function(dataUrl) {
+        window.parent.postMessage({
+          type: 'exportImageResult',
+          requestId: requestId,
+          plotId: 'overall',
+          title: 'Overall Summary' + (focusedPhenotype ? ' (Focus: ' + focusLabel() + ')' : ''),
+          dataUrl: dataUrl,
+          width: exportWidth,
+          height: exportHeight
+        }, '*');
+      }).catch(function(err) {
+        window.parent.postMessage({
+          type: 'exportImageResult',
+          requestId: requestId,
+          plotId: 'overall',
+          error: String(err)
+        }, '*');
+      });
+    }
+
+    window.addEventListener('message', function(event) {
+      const msg = event.data || {};
+      if (msg.type === 'focusPhenotype') {
+        focusedPhenotype = normalizePhenotype(msg.phenotype);
+        render();
+      }
+      if (msg.type === 'exportImage') {
+        focusedPhenotype = normalizePhenotype(msg.phenotype);
+        render();
+        setTimeout(function() { exportImage(msg.requestId); }, 100);
+      }
+    });
+
+    Papa.parse('significant_associations.csv', {
+      download: true,
+      header: true,
+      skipEmptyLines: true,
+      complete: function(results) {
+        allData = results.data;
+        render();
+      }
+    });
+  </script>
+</body>
+</html>
