@@ -2,17 +2,17 @@
 <html>
 <head>
   <meta charset="utf-8">
-  <meta name="description" content="Interactive results for the FatWAS study.">
+  <meta name="description" content="Interactive results for the FatWAS study: phenome-wide associations of CT-derived adipose area and density in 22,710 patients.">
   <meta name="keywords" content="FatWAS, PheWAS, CT, adipose tissue, SFI, VFI, SFD, VFD">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Phenome-wide Associations of CT-derived Adipose Area and Radiodensity in 22,779 Patients</title>
+  <title>Phenome-wide Associations of CT-derived Adipose Area and Density in 22,710 Patients</title>
 
   <link href="https://fonts.googleapis.com/css?family=Google+Sans|Noto+Sans|Castoro" rel="stylesheet">
   <link rel="stylesheet" href="./static/css/bulma.min.css">
   <link rel="stylesheet" href="./static/css/bulma-carousel.min.css">
   <link rel="stylesheet" href="./static/css/bulma-slider.min.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jpswalsh/academicons@1/css/academicons.min.css">
-  <link rel="stylesheet" href="./static/css/index.css?v=20260302a">
+  <link rel="stylesheet" href="./static/css/index.css?v=20260930b">
   <link rel="stylesheet" href="./static/css/tablesorter.css">
   <link rel="icon" href="./static/images/favicon.svg">
 
@@ -27,7 +27,7 @@
   <script src="./static/js/bulma-carousel.min.js"></script>
   <script src="./static/js/bulma-slider.min.js"></script>
   <script src="./static/js/fontawesome.all.min.js"></script>
-  <script src="./static/js/fatwas.js?v=20260302e" defer></script>
+  <script src="./static/js/fatwas.js?v=20260930b" defer></script>
 </head>
 <body>
 
@@ -44,6 +44,8 @@
       <a class="navbar-item" href="#">
         <span class="icon"><i class="fas fa-home"></i></span>
       </a>
+      <a class="navbar-item" href="#abstract">Abstract</a>
+      <a class="navbar-item" href="#methods">Methods</a>
       <div class="navbar-item has-dropdown is-hoverable">
         <a class="navbar-link">Visualize Results</a>
         <div class="navbar-dropdown">
@@ -54,6 +56,9 @@
           <a class="navbar-item" href="#overall_results">Overall</a>
         </div>
       </div>
+      <a class="navbar-item" href="#association_table">Association Table</a>
+      <a class="navbar-item" href="#joint_atlas">Joint Area–Density Atlas</a>
+      <a class="navbar-item" href="#downloads">Downloads</a>
     </div>
   </div>
 </nav>
@@ -63,14 +68,20 @@
     <div class="container is-max-desktop">
       <div class="columns is-centered">
         <div class="column has-text-centered">
-          <h1 class="title is-2 publication-title">Phenome-wide Associations of CT-derived Adipose Area and Radiodensity in 22,779 Patients: Uncovering Unexpected Disease Connections</h1>
+          <h1 class="title is-2 publication-title">Phenome-wide Associations of CT-derived Adipose Area and Density in 22,710 Patients: Uncovering Unexpected Disease Connections</h1>
           <div class="is-size-5 publication-authors">
             <span class="author-block">FatWAS Study Team</span>
           </div>
           <div class="column has-text-centered">
             <div class="publication-links">
               <span class="link-block">
-                <a href="https://github.com" class="external-link button is-normal is-rounded is-dark">
+                <a href="#downloads" class="external-link button is-normal is-rounded is-dark">
+                  <span class="icon"><i class="fas fa-database"></i></span>
+                  <span>Data</span>
+                </a>
+              </span>
+              <span class="link-block">
+                <a href="https://github.com/atesfet/fatwas.io" class="external-link button is-normal is-rounded is-dark">
                   <span class="icon"><i class="fab fa-github"></i></span>
                   <span>Code</span>
                 </a>
@@ -79,21 +90,43 @@
           </div>
         </div>
       </div>
+      <div class="stat-grid">
+        <div class="stat-tile"><div class="stat-value">22,710</div><div class="stat-label">patients, 2 centres</div></div>
+        <div class="stat-tile"><div class="stat-value">624</div><div class="stat-label">phenotypes tested</div></div>
+        <div class="stat-tile"><div class="stat-value">2,496</div><div class="stat-label">marker–phenotype tests</div></div>
+        <div class="stat-tile"><div class="stat-value">922</div><div class="stat-label">significant associations</div></div>
+        <div class="stat-tile"><div class="stat-value">373</div><div class="stat-label">phenotypes with ≥ 1 association</div></div>
+      </div>
     </div>
   </div>
 </section>
 
-<section class="section">
+<section class="section" id="abstract">
   <div class="container is-max-desktop">
     <div class="columns is-centered has-text-centered">
       <div class="column is-four-fifths">
         <h2 class="title is-3">Abstract</h2>
         <div class="content has-text-justified">
-          <p>Large-scale, quantitative phenotyping from already-acquired clinical imaging offers a new opportunistic avenue to characterize adipose tissue. Here, we perform a phenome-wide association study (PheWAS) of adipose composition derived automatically from abdominal CT scans.</p>
-          <p>We linked subcutaneous and visceral fat area (SFI and VFI) and radiodensity (SFD and VFD) from 22,779 patients to 1,447 EHR-derived phenotypes. We identified 1,563 significant associations across 522 diseases, recapitulating known links and identifying novel associations between adipose radiodensity and systemic disease.</p>
-          <p>This interactive website provides Manhattan and volcano plots for each marker and a searchable table of all significant associations.</p>
+          <p>Adipose tissue plays a central role in metabolic and inflammatory homeostasis. Connecting routine clinical imaging with health records offers an opportunistic approach to characterize adipose tissue through large-scale quantitative phenotyping, revealing systemic disease mechanisms. We performed a phenome-wide association study linking CT-derived adipose metrics to electronic health record phenotypes in 22,710 patients’ abdominal CT scans from two tertiary care centers. Subcutaneous and visceral fat cross-sectional area indices (SFI, VFI) and densities (SFD, VFD) were derived using a validated deep learning pipeline and tested against 624 distinct phenotypes (2,496 tests across four markers). We identified 922 significant associations across 373 phenotypes, recapitulating established relationships with morbid obesity (SFI OR=1.60), type 2 diabetes (VFI OR=1.57), cirrhosis (VFD OR=3.56), and pancreatic cancer (VFD OR=2.15). Adipose area and density effects were inversely correlated in their direction of associations across the phenome (Pearson r = −0.80, p &lt; 0.0001). They diverged in direction for 164 of the 178 phenotypes associated with both classes, indicating that CT density conveys composition-related physiology largely non-redundant with adipose quantity. When area and density were modelled jointly, density remained associated with disease independently of area for 351 of the 392 phenotypes with a joint adipose association, whereas area was independently informative for 136, and without density for only 6. These findings provide a hypothesis-generating atlas of adipose–disease associations in which adipose density emerges as a candidate biomarker of systemic physiology for replication and mechanistic study.</p>
+          <p>This website provides Manhattan and volcano plots of all 2,496 marker–phenotype tests, a searchable table of every association, the joint area–density atlas, and downloadable result files.</p>
         </div>
       </div>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="methods">
+  <div class="container is-max-desktop">
+    <div class="columns is-centered has-text-centered"><h2 class="title is-3">Study at a Glance</h2></div>
+    <div class="content has-text-justified">
+      <ul>
+        <li><b>Cohort.</b> 22,710 adults with a portal venous phase, contrast-enhanced abdominal CT (January 2013 – June 2024) at two tertiary care centres; earliest scan per patient.</li>
+        <li><b>CT markers.</b> At the L3 vertebral level, a validated deep learning pipeline measured subcutaneous and visceral fat area indices (<b>SFI</b>, <b>VFI</b>; cm²/m) and densities (<b>SFD</b>, <b>VFD</b>; HU). Each marker was standardised to a sex-specific z-score, so odds ratios are per one standard deviation.</li>
+        <li><b>Phenotypes.</b> ICD-9/ICD-10 codes from 1 year before to 3 months after the scan, mapped to phecodes (Phecode Map v1.2). Patients with ≥ 2 occurrences of a phecode were cases, 0 occurrences controls, and 1 occurrence excluded. Phenotypes with ≥ 200 cases and ≥ 200 controls were tested (624).</li>
+        <li><b>Models.</b> Logistic regression per marker and phenotype, adjusted for age, sex, BMI, tube current, tube voltage and slice thickness. Significance: Bonferroni over all 2,496 tests, p &lt; 0.05/2,496 = 2.0 × 10⁻⁵ (red dashed line in the plots).</li>
+        <li><b>Joint area–density models.</b> For each phenotype, all four markers in one model. Likelihood-ratio tests asked whether the markers carry any signal (4 df) and whether density adds to area, or area to density (2 df each). See the <a href="#joint_atlas">atlas</a> below.</li>
+        <li><b>Limitation.</b> The BMI covariate is the most recent value in the EHR, not a measurement at the time of the scan. All associations are cross-sectional and hypothesis-generating.</li>
+      </ul>
     </div>
   </div>
 </section>
@@ -104,11 +137,11 @@
       <h2 class="title is-3">Website Usage Tips</h2>
     </div>
     <div class="content has-text-justified">
-      <p>Hover over points for phenotype details and confidence intervals.</p>
-      <p>Use drag/zoom tools in the top-right of each plot to inspect dense regions.</p>
-      <p>Use the <b>Focus</b> button in the table to activate phenotype focus view across all plots.</p>
-      <p>In focus view, all associated markers are highlighted; non-associated marker plots show a centered \"not significant\" message.</p>
-      <p>Use <b>Download Focus PDF</b> to export a report with focused plots and the phenotype's associated rows.</p>
+      <p>Each plot shows all 624 tested phenotypes for that marker. Coloured points (by phenotype group) are Bonferroni-significant; grey points are not. The red dashed line is the Bonferroni threshold.</p>
+      <p>Hover over points for phenotype details, odds ratios and confidence intervals. Use the drag/zoom tools in the top-right of each plot to inspect dense regions.</p>
+      <p>Click a row, or its <b>Focus</b> button, in either table to highlight that phenotype across all plots. Plots in which the phenotype is not significant show a centred message.</p>
+      <p>The association table shows significant associations by default. Tick <b>Show all 2,496 tests</b> to include non-significant results.</p>
+      <p>Use <b>Download Focus PDF</b> to export a report with the focused plots and the phenotype's results for all four markers.</p>
       <p>Use <b>Open Discussion (GitHub)</b> to open the phenotype discussion thread/search in this repository (GitHub account required to comment). This is not an "Issue" but a "Feature"!</p>
     </div>
   </div>
@@ -117,42 +150,53 @@
 <section class="section" id="SFI_results">
   <div class="container is-max-desktop">
     <div class="columns is-centered has-text-centered"><h2 class="title is-3">SFI Results</h2></div>
-    <div class="iframe-container"><iframe id="plot-sfi-manhattan" src="plot.html?metric=SFI&type=manhattan&v=20260302h" class="responsive-iframe"></iframe></div>
-    <div class="iframe-container"><iframe id="plot-sfi-volcano" src="plot.html?metric=SFI&type=volcano&v=20260302h" class="responsive-iframe"></iframe></div>
+    <p class="section-caption">Subcutaneous fat area index: 137 Bonferroni-significant associations.</p>
+    <div class="iframe-container"><iframe id="plot-sfi-manhattan" src="plot.html?metric=SFI&type=manhattan&v=20260930b" class="responsive-iframe"></iframe></div>
+    <div class="iframe-container"><iframe id="plot-sfi-volcano" src="plot.html?metric=SFI&type=volcano&v=20260930b" class="responsive-iframe"></iframe></div>
   </div>
 </section>
 
 <section class="section" id="VFI_results">
   <div class="container is-max-desktop">
     <div class="columns is-centered has-text-centered"><h2 class="title is-3">VFI Results</h2></div>
-    <div class="iframe-container"><iframe id="plot-vfi-manhattan" src="plot.html?metric=VFI&type=manhattan&v=20260302h" class="responsive-iframe"></iframe></div>
-    <div class="iframe-container"><iframe id="plot-vfi-volcano" src="plot.html?metric=VFI&type=volcano&v=20260302h" class="responsive-iframe"></iframe></div>
+    <p class="section-caption">Visceral fat area index: 130 Bonferroni-significant associations.</p>
+    <div class="iframe-container"><iframe id="plot-vfi-manhattan" src="plot.html?metric=VFI&type=manhattan&v=20260930b" class="responsive-iframe"></iframe></div>
+    <div class="iframe-container"><iframe id="plot-vfi-volcano" src="plot.html?metric=VFI&type=volcano&v=20260930b" class="responsive-iframe"></iframe></div>
   </div>
 </section>
 
 <section class="section" id="SFD_results">
   <div class="container is-max-desktop">
     <div class="columns is-centered has-text-centered"><h2 class="title is-3">SFD Results</h2></div>
-    <div class="iframe-container"><iframe id="plot-sfd-manhattan" src="plot.html?metric=SFD&type=manhattan&v=20260302h" class="responsive-iframe"></iframe></div>
-    <div class="iframe-container"><iframe id="plot-sfd-volcano" src="plot.html?metric=SFD&type=volcano&v=20260302h" class="responsive-iframe"></iframe></div>
+    <p class="section-caption">Subcutaneous fat density: 351 Bonferroni-significant associations.</p>
+    <div class="iframe-container"><iframe id="plot-sfd-manhattan" src="plot.html?metric=SFD&type=manhattan&v=20260930b" class="responsive-iframe"></iframe></div>
+    <div class="iframe-container"><iframe id="plot-sfd-volcano" src="plot.html?metric=SFD&type=volcano&v=20260930b" class="responsive-iframe"></iframe></div>
   </div>
 </section>
 
 <section class="section" id="VFD_results">
   <div class="container is-max-desktop">
     <div class="columns is-centered has-text-centered"><h2 class="title is-3">VFD Results</h2></div>
-    <div class="iframe-container"><iframe id="plot-vfd-manhattan" src="plot.html?metric=VFD&type=manhattan&v=20260302h" class="responsive-iframe"></iframe></div>
-    <div class="iframe-container"><iframe id="plot-vfd-volcano" src="plot.html?metric=VFD&type=volcano&v=20260302h" class="responsive-iframe"></iframe></div>
+    <p class="section-caption">Visceral fat density: 304 Bonferroni-significant associations.</p>
+    <div class="iframe-container"><iframe id="plot-vfd-manhattan" src="plot.html?metric=VFD&type=manhattan&v=20260930b" class="responsive-iframe"></iframe></div>
+    <div class="iframe-container"><iframe id="plot-vfd-volcano" src="plot.html?metric=VFD&type=volcano&v=20260930b" class="responsive-iframe"></iframe></div>
   </div>
 </section>
 
 <section class="section" id="overall_results">
   <div class="container is-max-desktop">
     <div class="columns is-centered has-text-centered"><h2 class="title is-3">Overall Results</h2></div>
-    <div class="iframe-container"><iframe id="plot-overall" src="overall.html?v=20260302h" class="responsive-iframe"></iframe></div>
-    <div class="table-caption">Top associations across all four markers ranked by statistical significance.</div>
+    <div class="content has-text-justified">
+      <p>Density accounted for 655 of the 922 significant associations and area for 267. Of the 373 phenotypes with at least one association, 187 were associated with density only, 8 with area only, and 178 with both. For 164 of those 178, area and density pointed in opposite directions, almost always lower area with higher density (156).</p>
+    </div>
+    <div class="iframe-container"><iframe id="plot-overall" src="overall.html?v=20260930b" class="responsive-iframe"></iframe></div>
+    <div class="table-caption">Top 120 significant associations across all four markers, ranked by p-value.</div>
+  </div>
+</section>
 
-    <br>
+<section class="section" id="association_table">
+  <div class="container is-max-desktop">
+    <div class="columns is-centered has-text-centered"><h2 class="title is-3">Association Table</h2></div>
     <div class="focus-panel">
       <div><strong>Focus phenotype:</strong> <span id="focusPhenotypeLabel">None selected</span></div>
       <div id="focusPhenotypeDetails"></div>
@@ -164,7 +208,10 @@
     </div>
 
     <br>
-    <div class="table-caption">Significant FatWAS associations (Bonferroni-adjusted p-values).</div>
+    <div class="table-caption">Single-marker PheWAS results. OR per one standard deviation of the marker. Significant: p &lt; 0.05/2,496.</div>
+    <label class="checkbox table-toggle">
+      <input type="checkbox" id="showAllTestsToggle"> Show all 2,496 tests (default: the 922 significant associations)
+    </label>
     <div class="table-container">
       <table id="mainTable" class="display" style="width:100%">
         <thead>
@@ -176,6 +223,7 @@
             <th>Metric</th>
             <th>P Value</th>
             <th>OR (95% CI)</th>
+            <th>Significant</th>
             <th>Total (n)</th>
             <th>Cases (n)</th>
             <th>Controls (n)</th>
@@ -191,10 +239,102 @@
             <th></th>
             <th></th>
             <th></th>
+            <th></th>
           </tr>
         </thead>
         <tbody id="associationTableBody"></tbody>
       </table>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="joint_atlas">
+  <div class="container is-max-desktop">
+    <div class="columns is-centered has-text-centered"><h2 class="title is-3">Joint Area–Density Atlas</h2></div>
+    <div class="content has-text-justified">
+      <p>Area and density are correlated, so a single-marker association with density could simply mirror lower fat quantity, and the reverse. The atlas fits all four markers in one model and asks, for each phenotype, whether density is associated with disease given area, and whether area is associated given density.</p>
+    </div>
+    <div class="stat-grid">
+      <div class="stat-tile"><div class="stat-value">392</div><div class="stat-label">phenotypes with a joint signal (4-df test, Bonferroni)</div></div>
+      <div class="stat-tile"><div class="stat-value">351</div><div class="stat-label">density independent of area</div></div>
+      <div class="stat-tile"><div class="stat-value">136</div><div class="stat-label">area independent of density</div></div>
+      <div class="stat-tile"><div class="stat-value">6</div><div class="stat-label">area only, density not</div></div>
+      <div class="stat-tile"><div class="stat-value">360</div><div class="stat-label">Tier 1 (robust in all sensitivity analyses)</div></div>
+    </div>
+    <div class="content has-text-justified">
+      <p>Of the 392 phenotypes with a joint signal, 130 had both area and density independently associated, 221 density only, 6 area only (hyperlipidaemia, disorders of lipoid metabolism, abnormal glucose, calculus of kidney, hypercholesterolaemia, abnormal mammogram/breast findings), and for 35 the signal was shared and could not be attributed to either. Among the 359 phenotypes with a significant density marker given area, higher density went with higher odds for 336 and lower odds for 23. The joint class was the same after adjusting for site and after excluding probable segmentation failures for 587 of 624 phenotypes.</p>
+      <table class="table is-narrow is-fullwidth tier-table">
+        <thead><tr><th>Tier</th><th>Definition</th><th>Phenotypes</th><th>Intended use</th></tr></thead>
+        <tbody>
+          <tr><td>Tier 1</td><td>4-df test p &lt; 0.05/624 in the primary, site-adjusted and segmentation-QC analyses, with the same joint class in all three</td><td>360</td><td>prioritise for external replication</td></tr>
+          <tr><td>Tier 2</td><td>p &lt; 0.05/624 in the primary analysis; class or significance not stable across the sensitivity analyses</td><td>32</td><td>replicate with caution</td></tr>
+          <tr><td>Tier 3</td><td>FDR q &lt; 0.05 but not Bonferroni-significant</td><td>108</td><td>hypothesis generation only</td></tr>
+        </tbody>
+      </table>
+      <p class="table-note">Conditional ORs come from depot-pair models (e.g. SFD given SFI) and are per one standard deviation; <b>bold</b> = Bonferroni-significant over 2,496 tests. The 2-df tests are Bonferroni-corrected over 1,248 tests and interpreted only for phenotypes with a joint signal.</p>
+    </div>
+    <div class="table-container">
+      <table id="atlasTable" class="display" style="width:100%">
+        <thead>
+          <tr>
+            <th>Focus</th>
+            <th>Phenotype</th>
+            <th>Description</th>
+            <th>Phenotype Group</th>
+            <th>Tier</th>
+            <th>Joint class</th>
+            <th>Joint p (4 df)</th>
+            <th>Density given area p</th>
+            <th>Area given density p</th>
+            <th>SFD | SFI OR</th>
+            <th>VFD | VFI OR</th>
+            <th>SFI | SFD OR</th>
+            <th>VFI | VFD OR</th>
+            <th>Cases (n)</th>
+          </tr>
+          <tr>
+            <th></th>
+            <th><input type="text" placeholder="Search Phenotype"></th>
+            <th><input type="text" placeholder="Search Description"></th>
+            <th><input type="text" placeholder="Search Group"></th>
+            <th>
+              <select>
+                <option value="">All tiers</option>
+                <option value="Tier 1">Tier 1</option>
+                <option value="Tier 2">Tier 2</option>
+                <option value="Tier 3">Tier 3</option>
+              </select>
+            </th>
+            <th>
+              <select>
+                <option value="">All classes</option>
+                <option value="area + density (both independent)">area + density (both independent)</option>
+                <option value="density independent of area">density only (given area)</option>
+                <option value="area independent of density">area only (given density)</option>
+                <option value="shared (joint signal, not attributable)">shared, not attributable</option>
+                <option value="no joint signal">no Bonferroni joint signal (Tier 3)</option>
+              </select>
+            </th>
+            <th></th><th></th><th></th><th></th><th></th><th></th><th></th><th></th>
+          </tr>
+        </thead>
+        <tbody id="atlasTableBody"></tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="downloads">
+  <div class="container is-max-desktop">
+    <div class="columns is-centered has-text-centered"><h2 class="title is-3">Downloads</h2></div>
+    <div class="content">
+      <ul>
+        <li><a href="data/all_associations.csv" download>all_associations.csv</a>: all 2,496 single-marker tests (624 phenotypes × 4 markers).</li>
+        <li><a href="data/significant_associations.csv" download>significant_associations.csv</a>: the 922 Bonferroni-significant associations.</li>
+        <li><a href="data/joint_atlas.csv" download>joint_atlas.csv</a>: the 500 phenotypes with a joint signal (Tiers 1–3), as shown above.</li>
+        <li><a href="data/joint_atlas_full.csv" download>joint_atlas_full.csv</a>: the full joint area–density atlas for all 624 phenotypes, including marginal, conditional and four-marker estimates and the sensitivity analyses.</li>
+      </ul>
+      <p class="table-note">Results version: v18 (corrected full-cohort PheWAS), updated 30 September 2026.</p>
     </div>
   </div>
 </section>

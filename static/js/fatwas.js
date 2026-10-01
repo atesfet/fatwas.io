@@ -14,6 +14,8 @@
 
   let rawRows = [];
   let table = null;
+  let atlasTable = null;
+  let showAllTests = false;
   let selectedPhenotype = null;
   let pendingImageRequests = {};
 
@@ -63,12 +65,13 @@
       const pheno = esc(r.phenotype);
       return '<tr>' +
         '<td><button class=\"button is-small is-link is-light focus-select-btn\" data-phenotype=\"' + pheno + '\" type=\"button\">Focus</button></td>' +
-        '<td>' + esc(r.phenotype) + '</td>' +
+        '<td>' + esc(r.code) + '</td>' +
         '<td>' + esc(r.description) + '</td>' +
         '<td>' + esc(r.group) + '</td>' +
         '<td>' + esc(r.metric) + '</td>' +
-        '<td>' + esc(r.bonf_pval) + '</td>' +
-        '<td>' + esc(r.OR_CI) + '</td>' +
+        '<td data-order="' + esc(r.p) + '">' + esc(r.p_display) + '</td>' +
+        '<td data-order="' + esc(r.OR) + '">' + esc(r.OR_CI) + '</td>' +
+        '<td>' + esc(r.significant) + '</td>' +
         '<td>' + esc(r.n_total) + '</td>' +
         '<td>' + esc(r.n_cases) + '</td>' +
         '<td>' + esc(r.n_controls) + '</td>' +
@@ -105,10 +108,11 @@
 
     const rows = phenotypeRows(selectedPhenotype);
     const desc = rows.length > 0 ? rows[0].description : '';
-    const markers = Array.from(new Set(rows.map(function(r) { return r.metric; }))).join(', ');
+    const sigMarkers = rows.filter(function(r) { return r.significant === 'yes'; }).map(function(r) { return r.metric; });
 
-    label.textContent = selectedPhenotype + (desc ? ' - ' + desc : '');
-    details.textContent = rows.length + ' associated row(s) across marker(s): ' + markers;
+    label.textContent = (rows.length ? rows[0].code : selectedPhenotype) + (desc ? ' - ' + desc : '');
+    details.textContent = sigMarkers.length + ' of ' + rows.length + ' tested marker(s) Bonferroni-significant' +
+      (sigMarkers.length ? ': ' + sigMarkers.join(', ') : '') + '.';
     pdfButton.disabled = rows.length === 0;
     discussionButton.disabled = rows.length === 0;
   }
@@ -133,9 +137,27 @@
     if (table) {
       table.draw(false);
     }
+    if (atlasTable) {
+      atlasTable.draw(false);
+    }
   }
 
   function initDataTable() {
+    // Significant-only filter, toggled by the "show all tests" checkbox (column 7 = Significant).
+    $.fn.dataTable.ext.search.push(function(settings, data) {
+      if (settings.nTable.id !== 'mainTable' || showAllTests) {
+        return true;
+      }
+      return data[7] === 'yes';
+    });
+    const toggle = document.getElementById('showAllTestsToggle');
+    if (toggle) {
+      toggle.addEventListener('change', function() {
+        showAllTests = this.checked;
+        table.draw();
+      });
+    }
+
     table = $('#mainTable').DataTable({
       orderCellsTop: true,
       pageLength: 25,
@@ -169,7 +191,7 @@
 
     $('#mainTable tbody').on('click', 'tr', function() {
       const rowData = table.row(this).data();
-      if (!rowData || !rowData.length) {
+      if (!rowData || rowData[1] === undefined) {
         return;
       }
       setFocusPhenotype(rowData[1]);
@@ -270,7 +292,7 @@
 
     try {
       const images = [];
-      const associatedMetrics = new Set(rows.map(function(r) { return r.metric; }));
+      const associatedMetrics = new Set(rows.map(function(r) { return r.metric; }));  // all tested markers
       const exportIframeIds = IFRAME_IDS.filter(function(id) {
         if (id === 'plot-overall') {
           return true;
@@ -300,14 +322,15 @@
       doc.setFontSize(14);
       doc.text('FatWAS Focus Report', margin, margin);
       doc.setFontSize(11);
-      doc.text('Phenotype: ' + selectedPhenotype, margin, margin + 20);
+      doc.text('Phenotype: ' + rows[0].code + (rows[0].description ? ' - ' + rows[0].description : ''), margin, margin + 20);
 
       const bodyRows = rows.map(function(r) {
         return [
           r.metric,
           r.group,
-          r.bonf_pval,
+          r.p_display,
           r.OR_CI,
+          r.significant,
           r.n_cases,
           r.n_controls
         ];
@@ -315,7 +338,7 @@
 
       doc.autoTable({
         startY: margin + 34,
-        head: [['Metric', 'Group', 'Adj P', 'OR (95% CI)', 'Cases', 'Controls']],
+        head: [['Metric', 'Group', 'P', 'OR per SD (95% CI)', 'Bonferroni sig.', 'Cases', 'Controls']],
         body: bodyRows,
         theme: 'striped',
         styles: { fontSize: 8 },
@@ -365,7 +388,7 @@
   }
 
   function initAssociationsTable() {
-    Papa.parse('significant_associations.csv', {
+    Papa.parse('data/all_associations.csv', {
       download: true,
       header: true,
       skipEmptyLines: true,
@@ -373,10 +396,14 @@
         rawRows = results.data.map(function(r) {
           return {
             phenotype: normalizePhenotype(r.phenotype),
+            code: r.phenotype || '',
             description: r.description || '',
             group: r.group || '',
             metric: r.metric || '',
-            bonf_pval: r.bonf_pval || '',
+            p: r.p || '',
+            p_display: r.p_display || '',
+            significant: r.significant || '',
+            OR: r.OR || '',
             OR_CI: r.OR_CI || '',
             n_total: r.n_total || '',
             n_cases: r.n_cases || '',
@@ -389,7 +416,82 @@
         renderFocusInfo();
       },
       error: function(err) {
-        console.error('Could not load significant_associations.csv', err);
+        console.error('Could not load data/all_associations.csv', err);
+      }
+    });
+  }
+
+  function atlasCell(orCi, sig) {
+    const order = ' data-order="' + esc(parseFloat(orCi)) + '"';
+    return sig === 'yes' ? '<td' + order + '><b>' + esc(orCi) + '</b></td>' : '<td class="not-sig"' + order + '>' + esc(orCi) + '</td>';
+  }
+
+  function initAtlasTable() {
+    Papa.parse('data/joint_atlas.csv', {
+      download: true,
+      header: true,
+      skipEmptyLines: true,
+      complete: function(results) {
+        const tbody = document.getElementById('atlasTableBody');
+        if (!tbody) {
+          return;
+        }
+        tbody.innerHTML = results.data.map(function(r) {
+          const pheno = esc(normalizePhenotype(r.phenotype));
+          return '<tr>' +
+            '<td><button class="button is-small is-link is-light focus-select-btn" data-phenotype="' + pheno + '" type="button">Focus</button></td>' +
+            '<td>' + esc(r.phenotype) + '</td>' +
+            '<td>' + esc(r.description) + '</td>' +
+            '<td>' + esc(r.group) + '</td>' +
+            '<td>' + esc(r.tier) + '</td>' +
+            '<td>' + esc(r.joint_class) + '</td>' +
+            '<td data-order="' + esc(r.omnibus_p) + '">' + esc(r.omnibus_p_display) + '</td>' +
+            '<td data-order="' + esc(r.density_given_area_p) + '">' + esc(r.density_given_area_p_display) + '</td>' +
+            '<td data-order="' + esc(r.area_given_density_p) + '">' + esc(r.area_given_density_p_display) + '</td>' +
+            atlasCell(r.SFD_given_SFI_OR_CI, r.SFD_given_SFI_sig) +
+            atlasCell(r.VFD_given_VFI_OR_CI, r.VFD_given_VFI_sig) +
+            atlasCell(r.SFI_given_SFD_OR_CI, r.SFI_given_SFD_sig) +
+            atlasCell(r.VFI_given_VFD_OR_CI, r.VFI_given_VFD_sig) +
+            '<td>' + esc(r.n_cases) + '</td>' +
+          '</tr>';
+        }).join('');
+
+        atlasTable = $('#atlasTable').DataTable({
+          orderCellsTop: true,
+          pageLength: 25,
+          order: [[6, 'asc']],
+          columnDefs: [
+            { targets: 0, orderable: false, searchable: false, width: '72px' }
+          ],
+          rowCallback: function(row, data) {
+            const isFocused = selectedPhenotype && normalizePhenotype(data[1]) === selectedPhenotype;
+            $(row).toggleClass('focus-row', Boolean(isFocused));
+          }
+        });
+
+        $('#atlasTable thead tr:eq(1) th').each(function(i) {
+          const input = $('input, select', this);
+          if (input.length) {
+            input.on('keyup change', function() {
+              const isSelect = this.tagName === 'SELECT';
+              const value = isSelect && this.value ? '^' + $.fn.dataTable.util.escapeRegex(this.value) + '$' : this.value;
+              if (atlasTable.column(i).search() !== value) {
+                atlasTable.column(i).search(value, isSelect, !isSelect).draw();
+              }
+            });
+          }
+        });
+
+        $('#atlasTable tbody').on('click', 'tr', function() {
+          const rowData = atlasTable.row(this).data();
+          if (!rowData || rowData[1] === undefined) {
+            return;
+          }
+          setFocusPhenotype(rowData[1]);
+        });
+      },
+      error: function(err) {
+        console.error('Could not load data/joint_atlas.csv', err);
       }
     });
   }
@@ -427,5 +529,6 @@
     initNavbar();
     initControls();
     initAssociationsTable();
+    initAtlasTable();
   });
 })();

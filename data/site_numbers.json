@@ -1,0 +1,53 @@
+{
+  "patients": 22710,
+  "sites": 2,
+  "phenotypes_tested": 624,
+  "tests": 2496,
+  "bonferroni_threshold": 2.003205128205128e-05,
+  "significant_associations": 922,
+  "significant_phenotypes": 373,
+  "significant_groups": 14,
+  "significant_by_marker": {
+    "SFI": 137,
+    "VFI": 130,
+    "SFD": 351,
+    "VFD": 304
+  },
+  "phenotypes_by_n_markers": {
+    "1": 68,
+    "2": 142,
+    "3": 82,
+    "4": 81
+  },
+  "density_associations": 655,
+  "area_associations": 267,
+  "density_only_phenotypes": 187,
+  "area_only_phenotypes": 8,
+  "both_class_phenotypes": 178,
+  "examples_OR": {
+    "morbid obesity SFI": 1.6,
+    "type 2 diabetes VFI": 1.57,
+    "cirrhosis VFD": 3.56,
+    "pancreatic cancer VFD": 2.15
+  },
+  "joint": {
+    "phenotypes tested": 624,
+    "marginal: any Bonferroni-significant marker": 373,
+    "joint omnibus Bonferroni-significant (4 df)": 392,
+    "joint omnibus BH-FDR q<0.05": 500,
+    "density informative given area (2-df LRT, Bonferroni)": 351,
+    "area informative given density (2-df LRT, Bonferroni)": 136,
+    "  both independently informative": 130,
+    "  density only independently informative": 221,
+    "  area only independently informative": 6,
+    "  shared signal, not attributable": 35,
+    "Tier 1 (robust across sensitivities)": 360,
+    "Tier 2": 32,
+    "Tier 3 (FDR only)": 108,
+    "joint class identical in all three analyses (all 624)": 587,
+    "phenotypes with a Bonferroni-significant conditional density marker: higher density": 336,
+    "phenotypes with a Bonferroni-significant conditional density marker: lower density": 23,
+    "phenotypes with a Bonferroni-significant conditional density marker: mixed SFD/VFD direction": 0
+  },
+  "atlas_rows": 500
+}

@@ -50,7 +50,7 @@
     }
 
     function toPValueFromRow(row) {
-      return parsePValue(row.p) || parsePValue(row.bonf_pval) || 1e-300;
+      return parsePValue(row.p) || 1e-300;
     }
 
     function normalizePhenotype(value) {
@@ -82,7 +82,7 @@
         return normalizePhenotype(r.phenotype) === focusedPhenotype;
       });
       const desc = hit && hit.description ? String(hit.description).trim() : '';
-      return focusedPhenotype + (desc ? (' - ' + desc) : '');
+      return (hit ? hit.phenotype : focusedPhenotype) + (desc ? (' - ' + desc) : '');
     }
 
     function render() {
@@ -90,17 +90,23 @@
         .filter(r => (r.metric || '').toUpperCase() === metric)
         .map(r => ({
           phenotype: normalizePhenotype(r.phenotype),
+          label: r.phenotype || '',
+          code: toNum(r.phenotype),
           description: r.description || '',
           group: r.group || '',
           color: r.color || 'gray',
           p: toPValueFromRow(r),
+          p_display: r.p_display || '',
+          significant: r.significant === 'yes',
           or: toNum(r.OR),
           or_ci: r.OR_CI || '',
+          n_cases: r.n_cases || '',
           groupnum: toNum(r.groupnum)
         }))
         .filter(r => r.p && r.or);
 
-      filtered.sort((a, b) => (a.groupnum || 999) - (b.groupnum || 999) || a.p - b.p);
+      // Manhattan order: phecode group, then phecode.
+      filtered.sort((a, b) => (a.groupnum || 999) - (b.groupnum || 999) || (a.code || 0) - (b.code || 0));
 
       const mapped = filtered.map((r, idx) => {
         const y = -Math.log10(r.p);
@@ -108,26 +114,39 @@
         return {
           x: x,
           y: y,
-          text: r.description + '<br>Phenotype: ' + r.phenotype + '<br>Group: ' + r.group + '<br>OR (95% CI): ' + r.or_ci + '<br>p: ' + r.p.toExponential(2),
+          text: r.description + '<br>Phenotype: ' + r.label + '<br>Group: ' + r.group +
+            '<br>OR (95% CI): ' + r.or_ci + '<br>p: ' + r.p_display + '<br>Cases: ' + r.n_cases +
+            '<br>Bonferroni-significant: ' + (r.significant ? 'yes' : 'no'),
           color: r.color,
+          significant: r.significant,
+          group: r.group,
           phenotype: r.phenotype
         };
       });
 
-      const base = mapped.filter(r => !focusedPhenotype || r.phenotype !== focusedPhenotype);
+      const others = mapped.filter(r => !focusedPhenotype || r.phenotype !== focusedPhenotype);
       const focus = mapped.filter(r => focusedPhenotype && r.phenotype === focusedPhenotype);
+      const dim = focusedPhenotype ? 0.5 : 1;
 
-      const traces = [
-        {
-          x: base.map(r => r.x),
-          y: base.map(r => r.y),
+      function pointTrace(rows, sig) {
+        return {
+          x: rows.map(r => r.x),
+          y: rows.map(r => r.y),
           mode: 'markers',
           type: 'scatter',
-          marker: { size: 7, color: base.map(r => r.color), opacity: focusedPhenotype ? 0.38 : 0.8 },
-          text: base.map(r => r.text),
+          marker: sig
+            ? { size: 7, color: rows.map(r => r.color), opacity: 0.85 * dim }
+            : { size: 5, color: '#9a9a9a', opacity: 0.35 * dim },
+          text: rows.map(r => r.text),
           hovertemplate: '%{text}<extra></extra>',
+          name: sig ? 'Bonferroni-significant' : 'Not significant',
           showlegend: false
-        }
+        };
+      }
+
+      const traces = [
+        pointTrace(others.filter(r => !r.significant), false),
+        pointTrace(others.filter(r => r.significant), true)
       ];
 
       if (focus.length) {
@@ -149,22 +168,38 @@
         });
       }
 
-      const bonf = 0.05 / 1447;
-      const xaxis = { title: type === 'volcano' ? 'log2(Odds Ratio)' : 'Phenotype Rank' };
-      const yaxis = { title: '-log10(p)' };
+      // Bonferroni threshold across all marker-phenotype tests in the file (0.05 / 2,496).
+      const bonf = 0.05 / allData.length;
+      const xaxis = { title: type === 'volcano' ? 'log2(Odds Ratio per SD)' : 'Phenotype group', zeroline: type === 'volcano' };
+      if (type !== 'volcano') {
+        const ticks = [];
+        let start = 0;
+        for (let i = 1; i <= mapped.length; i++) {
+          if (i === mapped.length || mapped[i].group !== mapped[start].group) {
+            ticks.push({ pos: (mapped[start].x + mapped[i - 1].x) / 2, label: mapped[start].group });
+            start = i;
+          }
+        }
+        xaxis.tickvals = ticks.map(t => t.pos);
+        xaxis.ticktext = ticks.map(t => t.label);
+        xaxis.tickangle = -45;
+        xaxis.showgrid = false;
+      }
+      const yaxis = { title: '-log10(p)', rangemode: 'tozero' };
 
+      const focusSig = focus.some(r => r.significant);
       const layout = {
         title: plotTitle() + (focusedPhenotype ? ' (Focus: ' + focusLabel() + ')' : ''),
         xaxis: xaxis,
         yaxis: yaxis,
-        annotations: (focusedPhenotype && !focus.length) ? [{
+        annotations: (focusedPhenotype && !focusSig) ? [{
           xref: 'paper',
           yref: 'paper',
           x: 0.5,
           y: 0.5,
           xanchor: 'center',
           yanchor: 'middle',
-          text: 'Focused phenotype not significant for ' + metric,
+          text: focus.length ? ('Focused phenotype not Bonferroni-significant for ' + metric) : ('Focused phenotype not tested for ' + metric),
           showarrow: false,
           font: { size: 14, color: '#8b0000' },
           bgcolor: 'rgba(255,245,245,0.96)',
@@ -179,7 +214,7 @@
           y0: -Math.log10(bonf), y1: -Math.log10(bonf),
           line: { color: 'red', width: 1.5, dash: 'dash' }
         }],
-        margin: { l: 60, r: 20, t: 60, b: 60 }
+        margin: { l: 60, r: 20, t: 60, b: type === 'volcano' ? 60 : 130 }
       };
 
       Plotly.newPlot('plot', traces, layout, { responsive: true, displaylogo: false });
@@ -226,7 +261,7 @@
       }
     });
 
-    Papa.parse('significant_associations.csv', {
+    Papa.parse('data/all_associations.csv', {
       download: true,
       header: true,
       skipEmptyLines: true,

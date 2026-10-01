@@ -46,7 +46,7 @@
     }
 
     function toPValueFromRow(row) {
-      return parsePValue(row.p) || parsePValue(row.bonf_pval) || 1e-300;
+      return parsePValue(row.p) || 1e-300;
     }
 
     function normalizePhenotype(value) {
@@ -74,19 +74,21 @@
         return normalizePhenotype(r.phenotype) === focusedPhenotype;
       });
       const desc = hit && hit.description ? String(hit.description).trim() : '';
-      return focusedPhenotype + (desc ? (' - ' + desc) : '');
+      return (hit ? hit.phenotype : focusedPhenotype) + (desc ? (' - ' + desc) : '');
     }
 
     function render() {
       const data = allData.map(r => ({
         phenotype: normalizePhenotype(r.phenotype),
+          code: r.phenotype || '',
         description: r.description || '',
         metric: r.metric || '',
         p: toPValueFromRow(r),
         or: toNum(r.OR),
         lower: toNum(r.lower),
         upper: toNum(r.upper),
-        group: r.group || ''
+        group: r.group || '',
+        p_display: r.p_display || ''
       })).filter(r => r.p && r.or && r.lower && r.upper);
 
       data.sort((a, b) => a.p - b.p);
@@ -96,11 +98,11 @@
 
       const mapped = top.map(r => ({
         x: r.or,
-        y: r.metric + ' | ' + r.phenotype + ': ' + r.description,
+        y: r.metric + ' | ' + r.code + ': ' + r.description,
         errPlus: r.upper - r.or,
         errMinus: r.or - r.lower,
         color: metricColors[r.metric] || '#666',
-        text: r.metric + '<br>' + r.description + '<br>Phenotype: ' + r.phenotype + '<br>Group: ' + r.group + '<br>OR: ' + r.or.toFixed(2) + ' [' + r.lower.toFixed(2) + '-' + r.upper.toFixed(2) + ']<br>p: ' + r.p.toExponential(2),
+        text: r.metric + '<br>' + r.description + '<br>Phenotype: ' + r.code + '<br>Group: ' + r.group + '<br>OR: ' + r.or.toFixed(2) + ' [' + r.lower.toFixed(2) + '-' + r.upper.toFixed(2) + ']<br>p: ' + r.p_display,
         phenotype: r.phenotype
       }));
 
@@ -216,7 +218,7 @@
       }
     });
 
-    Papa.parse('significant_associations.csv', {
+    Papa.parse('data/significant_associations.csv', {
       download: true,
       header: true,
       skipEmptyLines: true,
