@@ -283,3 +283,62 @@ table.dataTable tbody tr.focus-row {
 .focus-select-btn {
   min-width: 58px;
 }
+
+/* v18 additions: headline numbers, captions, atlas table */
+.stat-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 12px;
+  margin: 1.5rem 0;
+}
+
+.stat-tile {
+  border: 1px solid #e3e6ea;
+  border-radius: 8px;
+  padding: 14px 12px;
+  text-align: center;
+  background: #fafbfc;
+}
+
+.stat-value {
+  font-family: 'Google Sans', sans-serif;
+  font-size: 1.8rem;
+  font-weight: 600;
+  color: #1e4d6e;
+  line-height: 1.2;
+}
+
+.stat-label {
+  font-size: 0.85rem;
+  color: #555;
+}
+
+.section-caption {
+  text-align: center;
+  color: #555;
+  margin-bottom: 0.75rem;
+}
+
+.table-toggle {
+  display: block;
+  margin: 0.5rem 0 0.75rem;
+  font-size: 0.9rem;
+}
+
+.table-note {
+  font-size: 0.85rem;
+  color: #555;
+}
+
+.tier-table td, .tier-table th {
+  font-size: 0.9rem;
+}
+
+table.dataTable td.not-sig {
+  color: #888;
+}
+
+#atlasTable thead select {
+  max-width: 140px;
+  font-size: 0.8rem;
+}
