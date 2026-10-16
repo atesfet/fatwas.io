@@ -443,7 +443,6 @@
             '<td>' + esc(r.phenotype) + '</td>' +
             '<td>' + esc(r.description) + '</td>' +
             '<td>' + esc(r.group) + '</td>' +
-            '<td>' + esc(r.tier) + '</td>' +
             '<td>' + esc(r.joint_class) + '</td>' +
             '<td data-order="' + esc(r.omnibus_p) + '">' + esc(r.omnibus_p_display) + '</td>' +
             '<td data-order="' + esc(r.density_given_area_p) + '">' + esc(r.density_given_area_p_display) + '</td>' +
@@ -459,7 +458,7 @@
         atlasTable = $('#atlasTable').DataTable({
           orderCellsTop: true,
           pageLength: 25,
-          order: [[6, 'asc']],
+          order: [[5, 'asc']],
           columnDefs: [
             { targets: 0, orderable: false, searchable: false, width: '72px' }
           ],

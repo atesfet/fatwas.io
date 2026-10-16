@@ -330,10 +330,6 @@ table.dataTable tbody tr.focus-row {
   color: #555;
 }
 
-.tier-table td, .tier-table th {
-  font-size: 0.9rem;
-}
-
 table.dataTable td.not-sig {
   color: #888;
 }

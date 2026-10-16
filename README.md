@@ -16,7 +16,7 @@ Results version: v18 (corrected full-cohort PheWAS; 624 phenotypes, 2,496 marker
 - `overall.html`: top 120 significant associations across the four markers
 - `data/all_associations.csv`: all 2,496 single-marker tests (`significant` = p < 0.05/2,496)
 - `data/significant_associations.csv`: the 922 significant associations (also at the root as `significant_associations.csv` for older links)
-- `data/joint_atlas.csv`: the 500 phenotypes with a joint signal (Tiers 1–3), as shown in the atlas table
+- `data/joint_atlas.csv`: the 392 phenotypes with a joint signal (4-df test, p < 0.05/624), as shown in the atlas table
 - `data/joint_atlas_full.csv`: the full atlas for all 624 phenotypes
 - `data/site_numbers.json`: every number quoted on the page, computed from the data
 - `static/`: CSS/JS/font assets
